@@ -1,0 +1,29 @@
+services:
+  mosquitto:
+    build: ./mosquitto
+    ports:
+      - target: 1883
+        published: 1883
+        protocol: tcp
+        mode: host
+      - target: 9001
+        published: 9001
+        protocol: tcp
+        mode: host
+    networks: iot-net
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+
+  sqlite:
+    build: ./sqlite
+    depends_on:
+      - mosquitto
+    ports:
+      - "8000:8000"
+    networks: iot-net
+    volumes:
+      - ./sqlite/data:/sqlite/data
+
+networks:
+  iot-net:
+    driver: bridge

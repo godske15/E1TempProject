@@ -5,10 +5,10 @@ FROM eclipse-mosquitto:latest
 LABEL maintainer="your-name <you@example.com>"
 
 # Expose MQTT port
-EXPOSE 1883
+#EXPOSE 1883
 
 # Expose MQTT over WebSockets port (if needed)
-EXPOSE 9001
+#EXPOSE 9001
 
 # Copy custom configuration file (if you have one)
 COPY config/mosquitto.conf /mosquitto/config/mosquitto.conf
