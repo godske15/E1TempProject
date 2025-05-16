@@ -1,7 +1,6 @@
-CREATE TABLE IF NOT EXISTS temperatur_log (
+CREATE TABLE IF NOT EXISTS temp (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    måler_navn TEXT NOT NULL,
-    temperatur REAL NOT NULL,
+    topic TEXT NOT NULL,
+    message REAL NOT NULL,
     logget_tid DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-

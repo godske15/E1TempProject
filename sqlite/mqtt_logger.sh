@@ -1,26 +1,17 @@
-#!/bin/bash
+#!/bin/sh
 
-MQTT_BROKER="localhost"
-MQTT_TOPIC="#"
-DB_PATH="/data/temperatur.db"
+# Create SQLite database if it doesn't exist
+sqlite3 /data/temperatur.db "CREATE TABLE IF NOT EXISTS temp (id INTEGER PRIMARY KEY AUTOINCREMENT, topic TEXT, message TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP);"
 
-echo "Starting MQTT to SQLite logger..."
-
-# Vent et øjeblik for at sikre at MQTT broker er oppe
-sleep 10
-
-while true
+# Subscribe to all topics and pipe to while loop to process each message
+# -v  outputs both topic and message on the same line
+# Then we divide the output into topic and message with "while read -r topic message
+mosquitto_sub -h $MQTT_BROKER_HOST -p $MQTT_BROKER_PORT -t '#' -v | while read -r topic message
 do
-        mosquitto_sub -h "$MQTT_BROKER" -t "$MQTT_TOPIC" | while read -r payload
-        do
-                echo "Received payload: $payload"
-                # Du kan tilpasse parsing her, hvis du sender f.eks. "sensor1:23.5"
-                sensor="mqtt_sensor"
-                temperatur="$payload"
 
-                # Indsæt i databasen
-                sqlite3 "$DB_PATH" "INSERT INTO temperatur_log (måler_navn, temperatur) VALUES ('$sensor', $temperatur);"
-        done
-        sleep 5
-done &
+  # Store message in SQLite database
+  sqlite3 /data/temperatur.db "INSERT INTO temp (topic, message) VALUES ('$topic', '$message');"
 
+  # Write out to the terminal the topic and message recieved
+  echo "Stored message from topic $topic: $message"
+done

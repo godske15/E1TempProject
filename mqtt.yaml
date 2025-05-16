@@ -1,28 +1,46 @@
 services:
-  mosquitto:
+  mqtt-broker:
     build: ./mosquitto
+    container_name: mqtt-broker
     ports:
-      - target: 1883
-        published: 1883
-        protocol: tcp
-        mode: host
-      - target: 9001
-        published: 9001
-        protocol: tcp
-        mode: host
-    networks: iot-net
+      - "1883:1883"  # MQTT default port
+      - "9001:9001"  # WebSockets port (if needed)
     volumes:
-      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    networks:
+      - iot-net
+    restart: unless-stopped
 
-  sqlite:
-    build: ./sqlite
+  sqlite-subscriber:
+    build: ./sqlite  # Path to your Dockerfile for this container
+    container_name: sqlite-subscriber
     depends_on:
-      - mosquitto
+      - mqtt-broker
+    volumes:
+      - ./sqlite/data:/sqlite/data  # Mount a volume for your SQLite database
+    environment:
+      - MQTT_BROKER_HOST=mqtt-broker  # This uses the service name as hostname
+      - MQTT_BROKER_PORT=1883
+    networks:
+      - iot-net
+    restart: unless-stopped
+
+  dashboard:
+    build: ./dashboard
+    container_name: temperature-dashboard
+    depends_on:
+      - sqlite-subscriber
     ports:
-      - "8000:8000"
-    networks: iot-net
+      - "8501:8501"
     volumes:
       - ./sqlite/data:/sqlite/data
+    environment:
+      - DB_PATH=/sqlite/data/temperatur.db
+    networks:
+      - iot-net
+    restart: unless-stopped
 
 networks:
   iot-net:

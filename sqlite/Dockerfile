@@ -6,16 +6,17 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Sæt arbejdsmappe
-WORKDIR /data
+# WORKDIR /data
+# RUN chmod 777 /data
 
 # Initier databasen
 COPY init.sql /init.sql
-RUN sqlite3 temperatur.db < /init.sql
+RUN sqlite3 /data/temperatur.db
 
 # Kopiér script og giv eksekveringsret
-COPY mqtt_logger.sh /data/mqtt_logger.sh
-RUN chmod +x /data/mqtt_logger.sh
+COPY mqtt_logger.sh /mqtt_logger.sh
+RUN chmod +x /mqtt_logger.sh
 
 # Start loggeren
-CMD ["/data/mqtt_logger.sh"]
+CMD ["/mqtt_logger.sh"]
 
