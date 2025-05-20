@@ -35,7 +35,8 @@ services:
     ports:
       - "8501:8501"
     volumes:
-      - ./sqlite/data:/sqlite/data
+       - ./dashboard:/app
+       - ./sqlite/data:/sqlite/data
     environment:
       - DB_PATH=/sqlite/data/temperatur.db
     networks:

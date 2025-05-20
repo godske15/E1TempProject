@@ -10,7 +10,7 @@ mosquitto_sub -h $MQTT_BROKER_HOST -p $MQTT_BROKER_PORT -t '#' -v | while read -
 do
 
   # Store message in SQLite database
-  sqlite3 /sqlite/data/temperatur.db "INSERT INTO temp (topic, message) VALUES ('$topic', '$message');"
+  sqlite3 /data/temperatur.db "INSERT INTO temp (topic, message) VALUES ('$topic', '$message');"
 
   # Write out to the terminal the topic and message recieved
   echo "Stored message from topic $topic: $message"
