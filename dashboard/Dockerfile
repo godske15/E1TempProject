@@ -1,5 +1,6 @@
 FROM python:3.9-slim
 
+<<<<<<< HEAD
 WORKDIR /app
 
 # Install required Python packages and dependencies for matplotlib
@@ -21,6 +22,13 @@ ENV STREAMLIT_SERVER_ENABLECORS=false \
     STREAMLIT_SERVER_ENABLEWEBSOCKETCOMPRESSION=false \
     WATCHDOG_NO_INOTIFY=1 \
     STREAMLIT_SERVER_FILEWATCH_DISABLED=true
+=======
+# Install required Python packages
+RUN pip install --no-cache-dir streamlit pandas sqlalchemy matplotlib
+
+# Copy the Streamlit app
+COPY dashboard.py /dashboard.py
+>>>>>>> efe1631797dc4c643d0f41b49a220d8f480833a9
 
 # Expose the Streamlit port
 EXPOSE 8501

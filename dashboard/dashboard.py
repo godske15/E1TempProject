@@ -2,13 +2,21 @@ import streamlit as st
 import pandas as pd
 import time
 import os
+<<<<<<< HEAD
 import matplotlib.pyplot as plt
+=======
+>>>>>>> efe1631797dc4c643d0f41b49a220d8f480833a9
 
 # Get database path from environment variable or use default
 DB_PATH = os.environ.get('DB_PATH', '/sqlite/data/temperatur.db')
 
+<<<<<<< HEAD
 # Set up database connection - Fix string formatting
 conn = st.connection('sqlite_db', type='sql', url=f'sqlite:///{DB_PATH}')
+=======
+# Set up database connection
+conn = st.connection('sqlite_db', type='sql', url='sqlite:///{DB_PATH}')
+>>>>>>> efe1631797dc4c643d0f41b49a220d8f480833a9
 
 st.title('MQTT Dashboard')
 st.subheader('Messages from MQTT Broker')
@@ -19,13 +27,20 @@ def update_graph():
         # Query data from the temp table
         query = 'SELECT id, topic, message, timestamp FROM temp ORDER BY timestamp DESC LIMIT 100'
         data = conn.query(query)
+<<<<<<< HEAD
+=======
+
+>>>>>>> efe1631797dc4c643d0f41b49a220d8f480833a9
         if not data.empty:
             # Convert to dataframe for visualization
             df = pd.DataFrame(data)
             # Convert timestamp to datetime if needed
             df['timestamp'] = pd.to_datetime(df['timestamp'])
+<<<<<<< HEAD
             # Convert message to numeric values where possible
             df['numeric_message'] = pd.to_numeric(df['message'], errors='coerce')
+=======
+>>>>>>> efe1631797dc4c643d0f41b49a220d8f480833a9
             return df
         else:
             st.warning("No data found in the database.")
@@ -37,13 +52,24 @@ def update_graph():
 # Create a layout
 col1, col2 = st.columns([3, 1])
 
+<<<<<<< HEAD
+=======
+with col1:
+    # Container for the charts and tables
+    main_container = st.container()
+    
+>>>>>>> efe1631797dc4c643d0f41b49a220d8f480833a9
 with col2:
     # Container for settings and stats
     settings_container = st.container()
     with settings_container:
         st.subheader("Settings")
+<<<<<<< HEAD
         # Settings for refresh rate (not necessary)
 	refresh_rate = st.slider("Refresh rate (seconds)", 5, 60, 10)
+=======
+        refresh_rate = st.slider("Refresh rate (seconds)", 5, 60, 10)
+>>>>>>> efe1631797dc4c643d0f41b49a220d8f480833a9
         topic_filter = st.text_input("Filter by topic (leave empty for all)")
 
 # Main update loop
@@ -56,6 +82,7 @@ if not df.empty:
     else:
         filtered_df = df
     
+<<<<<<< HEAD
     with col1:
         # Display numerical messages in a chart - IMPROVED CHART RENDERING
         try:
@@ -129,5 +156,46 @@ if "last_refresh" not in st.session_state:
 # Check if it's time to refresh
 if time.time() > st.session_state.last_refresh + refresh_rate:
     st.session_state.last_refresh = time.time()
+=======
+    with main_container:
+        # Display numerical messages in a chart if possible
+        try:
+            # Try to convert message to numeric values
+            numeric_df = filtered_df.copy()
+            numeric_df['numeric_message'] = pd.to_numeric(numeric_df['message'], errors='coerce')
+            numeric_df = numeric_df.dropna(subset=['numeric_message'])
+
+            if not numeric_df.empty:
+                st.subheader("Message Values Over Time")
+                chart_df = numeric_df.groupby(['topic', 'timestamp'])['numeric_message'].mean().unstack('topic')
+                st.line_chart(chart_df)
+            else:
+                st.info("No numeric messages found for charting.")
+        except Exception as e:
+            st.info("Could not display chart: messages are not numerical")
+
+        # Display the most recent messages
+        st.subheader("Recent Messages")
+        st.dataframe(filtered_df[['topic', 'message', 'timestamp']].head(10), 
+                     use_container_width=True)
+    
+    with settings_container:
+        st.subheader("Statistics")
+        st.metric("Total Messages", len(df))
+        st.metric("Unique Topics", df['topic'].nunique())
+
+        # Show topic distribution
+        st.subheader("Topic Distribution")
+        topic_counts = df['topic'].value_counts().head(5)
+        st.bar_chart(topic_counts)
+
+# Auto refresh button and functionality
+if st.button("Refresh Data"):
+>>>>>>> efe1631797dc4c643d0f41b49a220d8f480833a9
     st.cache_data.clear()
     st.rerun()
+
+# Add auto-refresh
+time.sleep(refresh_rate)
+st.cache_data.clear()
+st.rerun()

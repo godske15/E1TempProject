@@ -18,6 +18,7 @@ services:
     container_name: sqlite-subscriber
     depends_on:
       - mqtt-broker
+<<<<<<< HEAD
     volumes:
       - ./sqlite/data:/sqlite/data  # Mount a volume for your SQLite database
     environment:
@@ -37,6 +38,26 @@ services:
     volumes:
        - ./dashboard:/app
        - ./sqlite/data:/sqlite/data
+=======
+    volumes:
+      - ./sqlite/data:/sqlite/data  # Mount a volume for your SQLite database
+    environment:
+      - MQTT_BROKER_HOST=mqtt-broker  # This uses the service name as hostname
+      - MQTT_BROKER_PORT=1883
+    networks:
+      - iot-net
+    restart: unless-stopped
+
+  dashboard:
+    build: ./dashboard
+    container_name: temperature-dashboard
+    depends_on:
+      - sqlite-subscriber
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./sqlite/data:/sqlite/data
+>>>>>>> efe1631797dc4c643d0f41b49a220d8f480833a9
     environment:
       - DB_PATH=/sqlite/data/temperatur.db
     networks:
