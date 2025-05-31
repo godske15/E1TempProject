@@ -50,7 +50,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="filter-container">', unsafe_allow_html=True)
-st.subheader("🔍 Filter Settings")
+st.subheader("Filter Settings")
 topic_filter = st.text_input("Filter by topic (leave empty for all topics)", placeholder="Enter topic name...")
 st.markdown('</div>', unsafe_allow_html=True)
 
@@ -72,7 +72,7 @@ if not df.empty:
             st.subheader("Message Values Over Time")
             
             # Use Matplotlib for better control over line rendering
-            fig, ax = plt.subplots(figsize=(16, 8))  # Full width figure
+            fig, ax = plt.subplots(figsize=(24, 12))  # Full width figure
             
             # Get unique topics
             topics = numeric_df['topic'].unique()
@@ -85,9 +85,9 @@ if not df.empty:
                 ax.plot(topic_data['timestamp'], topic_data['numeric_message'], 
                        marker='o', label=topic, linewidth=2, markersize=4)
             
-            ax.set_xlabel('Time', fontsize=12)
-            ax.set_ylabel('Value', fontsize=12)
-            ax.legend(fontsize=10)
+            ax.set_xlabel('Time', fontsize=18)
+            ax.set_ylabel('Value', fontsize=18)
+            ax.legend(fontsize=14)
             ax.grid(True, alpha=0.3)
             
             # Improve layout
