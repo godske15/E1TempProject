@@ -3,6 +3,7 @@ import pandas as pd
 import time
 import os
 import matplotlib.pyplot as plt
+from sqlalchemy import text
 
 # Get database path from environment variable or use default
 DB_PATH = os.environ.get('DB_PATH', '/sqlite/data/temperatur.db')
@@ -127,9 +128,9 @@ with col_btn1:
 with col_btn2:
     if st.button("Reset Database", type="secondary"):
         try:
-            # Execute DELETE query using the underlying connection
+            # Execute DELETE query using the underlying connection with text wrapper
             with conn._instance.connect() as connection:
-                connection.execute("DELETE FROM temp")
+                connection.execute(text("DELETE FROM temp"))
                 connection.commit()
             st.success("Database reset successfully! All data has been cleared.")
             st.cache_data.clear()
