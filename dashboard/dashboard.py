@@ -128,8 +128,7 @@ with col_btn2:
     if st.button("Reset Database", type="secondary"):
         try:
             # Execute DELETE query to remove all records from the temp table
-            conn.session.execute("DELETE FROM temp")
-            conn.session.commit()
+            conn.query("DELETE FROM temp", ttl=0)
             st.success("Database reset successfully! All data has been cleared.")
             st.cache_data.clear()
             time.sleep(1)  # Brief pause to show the success message
