@@ -127,8 +127,10 @@ with col_btn1:
 with col_btn2:
     if st.button("Reset Database", type="secondary"):
         try:
-            # Execute DELETE query using the connection's execute method
-            conn.execute("DELETE FROM temp")
+            # Execute DELETE query using the underlying connection
+            with conn._instance.connect() as connection:
+                connection.execute("DELETE FROM temp")
+                connection.commit()
             st.success("Database reset successfully! All data has been cleared.")
             st.cache_data.clear()
             time.sleep(1)  # Brief pause to show the success message
