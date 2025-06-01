@@ -75,6 +75,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+# Define topic_filter at the top level before it's used
+topic_filter = st.text_input("Filter by topic", placeholder="Enter topic name...")
+
 # Main update loop
 df = update_graph()
 
@@ -92,7 +95,6 @@ if not df.empty:
         # Filter settings
         st.markdown('<div class="filter-container">', unsafe_allow_html=True)
         st.subheader("Filter Settings")
-        topic_filter = st.text_input("Filter by topic", placeholder="Enter topic name...")
         st.markdown('</div>', unsafe_allow_html=True)
         
         # Temperature alarm system - check latest values for each topic
