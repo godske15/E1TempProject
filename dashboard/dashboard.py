@@ -75,16 +75,17 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Define topic_filter at the top level before it's used
-topic_filter = st.text_input("Filter by topic", placeholder="Enter topic name...")
+# Initialize topic_filter from session state or empty string
+if 'topic_filter' not in st.session_state:
+    st.session_state.topic_filter = ""
 
 # Main update loop
 df = update_graph()
 
 if not df.empty:
     # Apply topic filter if specified
-    if topic_filter:
-        filtered_df = df[df['topic'].str.contains(topic_filter, case=False)]
+    if st.session_state.topic_filter:
+        filtered_df = df[df['topic'].str.contains(st.session_state.topic_filter, case=False)]
     else:
         filtered_df = df
     
@@ -197,6 +198,11 @@ if not df.empty:
     with col_bottom2:
         st.subheader("Statistics")
         st.metric("Total Messages", len(df))
+
+# Filter by topic input - moved below the graph
+st.session_state.topic_filter = st.text_input("Filter by topic", 
+                                              value=st.session_state.topic_filter,
+                                              placeholder="Enter topic name...")
 
 # Add refresh and reset buttons
 col_btn1, col_btn2 = st.columns(2)
