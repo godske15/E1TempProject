@@ -152,7 +152,7 @@ if not df.empty:
                 # Sort by timestamp to ensure proper line connections
                 topic_data = topic_data.sort_values('timestamp')
                 ax.plot(topic_data['timestamp'], topic_data['numeric_message'], 
-                       marker='o', label=topic, linewidth=2, markersize=4)
+                       marker='o', label=topic, linewidth=2, markersize=24)
             
             # Add horizontal lines for temperature thresholds
             ax.axhline(y=55, color='red', linestyle='--', alpha=0.7, label='55°C Limit')
