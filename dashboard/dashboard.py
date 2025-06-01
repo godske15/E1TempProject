@@ -133,7 +133,6 @@ if not df.empty:
                 st.markdown(f'<div style="font-size: 12px; padding: 5px; background-color: #f5f5f5; border-radius: 5px; margin: 5px 0;">Current: {temp_readings}</div>', unsafe_allow_html=True)
 
     # Display numerical messages in a chart - MAIN GRAPH (now full width)
-    # Display numerical messages in a chart - MAIN GRAPH (now full width)
     try:
         numeric_df = filtered_df.dropna(subset=['numeric_message'])
         
@@ -159,14 +158,14 @@ if not df.empty:
             ax.axhline(y=59, color='orange', linestyle='--', alpha=0.7, label='59°C Target Min')
             ax.axhline(y=60, color='green', linestyle='--', alpha=0.7, label='60°C Target Max')
             
-            ax.set_xlabel('Time', fontsize=36)
-            ax.set_ylabel('Temperature (°C)', fontsize=36)
-            ax.legend(fontsize=22)
+            ax.set_xlabel('Time', fontsize=48)  # Increased from 36 to 48
+            ax.set_ylabel('Temperature (°C)', fontsize=48)  # Increased from 36 to 48
+            ax.legend(fontsize=32)  # Increased from 22 to 32
             ax.grid(True, alpha=0.3)
             
             # Improve layout with larger tick font
-            plt.xticks(rotation=45, fontsize=36)
-            plt.yticks(fontsize=36)
+            plt.xticks(rotation=45, fontsize=42)  # Increased from 36 to 42
+            plt.yticks(fontsize=42)  # Increased from 36 to 42
             plt.tight_layout()
             
             # Display the plot
