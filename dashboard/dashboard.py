@@ -141,7 +141,7 @@ if not df.empty:
             st.subheader("Message Values Over Time")
             
             # Use Matplotlib for better control over line rendering
-            fig, ax = plt.subplots(figsize=(26, 12))  # Much larger graph size
+            fig, ax = plt.subplots(figsize=(30, 12))  # Much larger graph size
             
             # Get unique topics
             topics = numeric_df['topic'].unique()
@@ -159,9 +159,9 @@ if not df.empty:
             ax.axhline(y=59, color='orange', linestyle='--', alpha=0.7, label='59°C Target Min')
             ax.axhline(y=60, color='green', linestyle='--', alpha=0.7, label='60°C Target Max')
             
-            ax.set_xlabel('Time', fontsize=16)
-            ax.set_ylabel('Temperature (°C)', fontsize=16)
-            ax.legend(fontsize=14)
+            ax.set_xlabel('Time', fontsize=24)
+            ax.set_ylabel('Temperature (°C)', fontsize=24)
+            ax.legend(fontsize=22)
             ax.grid(True, alpha=0.3)
             
             # Improve layout with larger tick font
