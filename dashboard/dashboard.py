@@ -186,6 +186,13 @@ if not df.empty:
             st.error(f"Could not display chart: {e}")
             st.info("Messages may not be numerical")
     
+    # Filter by topic input - positioned between graph and recent messages
+    col_filter, col_spacer = st.columns([2, 2])
+    with col_filter:
+        st.session_state.topic_filter = st.text_input("Filter by topic", 
+                                                      value=st.session_state.topic_filter,
+                                                      placeholder="Enter topic name...")
+    
     # Create layout for bottom section - Recent Messages and Statistics side by side
     col_bottom1, col_bottom2 = st.columns([3, 1])
     
@@ -198,11 +205,6 @@ if not df.empty:
     with col_bottom2:
         st.subheader("Statistics")
         st.metric("Total Messages", len(df))
-
-# Filter by topic input - moved below the graph
-st.session_state.topic_filter = st.text_input("Filter by topic", 
-                                              value=st.session_state.topic_filter,
-                                              placeholder="Enter topic name...")
 
 # Add refresh and reset buttons
 col_btn1, col_btn2 = st.columns(2)
