@@ -51,7 +51,7 @@ st.markdown("""
     background-color: #ffebee;
     border: 3px solid #f44336;
     border-radius: 10px;
-    padding: 10px;
+    padding: 14px;
     margin: 10px 0;
     animation: blink 1s linear infinite;
 }
@@ -62,14 +62,14 @@ st.markdown("""
     background-color: #fff3e0;
     border: 2px solid #ff9800;
     border-radius: 8px;
-    padding: 8px;
+    padding: 12px;
     margin: 8px 0;
 }
 .success-box {
     background-color: #e8f5e8;
     border: 2px solid #4caf50;
     border-radius: 8px;
-    padding: 8px;
+    padding: 12px;
     margin: 8px 0;
 }
 </style>
@@ -150,7 +150,7 @@ if not df.empty:
                 st.subheader("Message Values Over Time")
                 
                 # Use Matplotlib for better control over line rendering
-                fig, ax = plt.subplots(figsize=(18, 10))  # Increased graph size
+                fig, ax = plt.subplots(figsize=(26, 12))  # Much larger graph size
                 
                 # Get unique topics
                 topics = numeric_df['topic'].unique()
@@ -168,13 +168,14 @@ if not df.empty:
                 ax.axhline(y=59, color='orange', linestyle='--', alpha=0.7, label='59°C Target Min')
                 ax.axhline(y=60, color='green', linestyle='--', alpha=0.7, label='60°C Target Max')
                 
-                ax.set_xlabel('Time', fontsize=12)
-                ax.set_ylabel('Temperature (°C)', fontsize=12)
-                ax.legend(fontsize=10)
+                ax.set_xlabel('Time', fontsize=16)
+                ax.set_ylabel('Temperature (°C)', fontsize=16)
+                ax.legend(fontsize=14)
                 ax.grid(True, alpha=0.3)
                 
-                # Improve layout
-                plt.xticks(rotation=45)
+                # Improve layout with larger tick font
+                plt.xticks(rotation=45, fontsize=14)
+                plt.yticks(fontsize=14)
                 plt.tight_layout()
                 
                 # Display the plot
