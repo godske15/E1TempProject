@@ -89,103 +89,94 @@ if not df.empty:
     else:
         filtered_df = df
     
-    # Create main layout with graph on left, controls on right
-    col_graph, col_controls = st.columns([4, 1])
-    
-    with col_controls:
-        # Filter settings
-        st.markdown('<div class="filter-container">', unsafe_allow_html=True)
-        st.subheader("Filter Settings")
-        st.markdown('</div>', unsafe_allow_html=True)
+    # Temperature alarm system - check latest values for each topic (moved before graph)
+    numeric_df = filtered_df.dropna(subset=['numeric_message'])
+    if not numeric_df.empty:
+        # Get the latest temperature reading for each topic
+        latest_temps = numeric_df.groupby('topic')['numeric_message'].last().reset_index()
+        latest_temps = latest_temps.sort_values('numeric_message')
         
-        # Temperature alarm system - check latest values for each topic
+        # Check alarm conditions
+        alarm_triggered = False
+        alarm_message = ""
+        
+        if len(latest_temps) >= 2:
+            lowest_temp = latest_temps.iloc[0]['numeric_message']
+            lowest_topic = latest_temps.iloc[0]['topic']
+            highest_temp = latest_temps.iloc[-1]['numeric_message']
+            highest_topic = latest_temps.iloc[-1]['topic']
+            
+            # Check if lowest temperature is over 55°C
+            if lowest_temp > 55:
+                alarm_triggered = True
+                alarm_message = f"TEMPERATURE ALARM: Lowest temperature ({lowest_topic}: {lowest_temp:.1f}°C) exceeds 55°C limit!"
+            
+            # Additional check: ensure one topic is in 59-60°C range
+            temp_in_range = any(59 <= temp <= 60 for temp in latest_temps['numeric_message'])
+            if not temp_in_range and highest_temp < 59:
+                st.markdown(f'<div class="warning-box"><strong>Warning:</strong> No temperature in optimal 59-60°C range. Highest: {highest_topic}: {highest_temp:.1f}°C</div>', unsafe_allow_html=True)
+        
+        # Display alarm if triggered
+        if alarm_triggered:
+            st.markdown(f'<div class="alarm-box"><h4 style="color: #d32f2f; margin: 0;">CRITICAL TEMPERATURE ALERT</h4><p style="margin: 5px 0; font-size: 14px;"><strong>Current temperatures:</strong></p>', unsafe_allow_html=True)
+            
+            for _, row in latest_temps.iterrows():
+                color = "#d32f2f" if row['numeric_message'] > 55 else "#2e7d32"
+                st.markdown(f"<p style='margin: 2px 0; color: {color}; font-size: 12px;'><strong>{row['topic']}: {row['numeric_message']:.1f}°C</strong></p>", unsafe_allow_html=True)
+            
+            st.markdown("</div>", unsafe_allow_html=True)
+        else:
+            # Show current status when no alarm
+            if len(latest_temps) >= 1:
+                st.markdown('<div class="success-box"><strong>Status:</strong> Temperature levels OK</div>', unsafe_allow_html=True)
+                temp_readings = " | ".join([f"{row['topic']}: {row['numeric_message']:.1f}°C" for _, row in latest_temps.iterrows()])
+                st.markdown(f'<div style="font-size: 12px; padding: 5px; background-color: #f5f5f5; border-radius: 5px; margin: 5px 0;">Current: {temp_readings}</div>', unsafe_allow_html=True)
+
+    # Display numerical messages in a chart - MAIN GRAPH (now full width)
+    # Display numerical messages in a chart - MAIN GRAPH (now full width)
+    try:
         numeric_df = filtered_df.dropna(subset=['numeric_message'])
+        
         if not numeric_df.empty:
-            # Get the latest temperature reading for each topic
-            latest_temps = numeric_df.groupby('topic')['numeric_message'].last().reset_index()
-            latest_temps = latest_temps.sort_values('numeric_message')
+            st.subheader("Message Values Over Time")
             
-            # Check alarm conditions
-            alarm_triggered = False
-            alarm_message = ""
+            # Use Matplotlib for better control over line rendering
+            fig, ax = plt.subplots(figsize=(26, 12))  # Much larger graph size
             
-            if len(latest_temps) >= 2:
-                lowest_temp = latest_temps.iloc[0]['numeric_message']
-                lowest_topic = latest_temps.iloc[0]['topic']
-                highest_temp = latest_temps.iloc[-1]['numeric_message']
-                highest_topic = latest_temps.iloc[-1]['topic']
-                
-                # Check if lowest temperature is over 55°C
-                if lowest_temp > 55:
-                    alarm_triggered = True
-                    alarm_message = f"TEMPERATURE ALARM: Lowest temperature ({lowest_topic}: {lowest_temp:.1f}°C) exceeds 55°C limit!"
-                
-                # Additional check: ensure one topic is in 59-60°C range
-                temp_in_range = any(59 <= temp <= 60 for temp in latest_temps['numeric_message'])
-                if not temp_in_range and highest_temp < 59:
-                    st.markdown(f'<div class="warning-box"><strong>Warning:</strong> No temperature in optimal 59-60°C range. Highest: {highest_topic}: {highest_temp:.1f}°C</div>', unsafe_allow_html=True)
+            # Get unique topics
+            topics = numeric_df['topic'].unique()
             
-            # Display alarm if triggered
-            if alarm_triggered:
-                st.markdown(f'<div class="alarm-box"><h4 style="color: #d32f2f; margin: 0;">CRITICAL TEMPERATURE ALERT</h4><p style="margin: 5px 0; font-size: 14px;"><strong>Current temperatures:</strong></p>', unsafe_allow_html=True)
-                
-                for _, row in latest_temps.iterrows():
-                    color = "#d32f2f" if row['numeric_message'] > 55 else "#2e7d32"
-                    st.markdown(f"<p style='margin: 2px 0; color: {color}; font-size: 12px;'><strong>{row['topic']}: {row['numeric_message']:.1f}°C</strong></p>", unsafe_allow_html=True)
-                
-                st.markdown("</div>", unsafe_allow_html=True)
-            else:
-                # Show current status when no alarm
-                if len(latest_temps) >= 1:
-                    st.markdown('<div class="success-box"><strong>Status:</strong> Temperature levels OK</div>', unsafe_allow_html=True)
-                    temp_readings = " | ".join([f"{row['topic']}: {row['numeric_message']:.1f}°C" for _, row in latest_temps.iterrows()])
-                    st.markdown(f'<div style="font-size: 12px; padding: 5px; background-color: #f5f5f5; border-radius: 5px; margin: 5px 0;">Current: {temp_readings}</div>', unsafe_allow_html=True)
-    
-    with col_graph:
-        # Display numerical messages in a chart - MAIN GRAPH
-        try:
-            numeric_df = filtered_df.dropna(subset=['numeric_message'])
+            # Plot each topic as a separate line
+            for topic in topics:
+                topic_data = numeric_df[numeric_df['topic'] == topic]
+                # Sort by timestamp to ensure proper line connections
+                topic_data = topic_data.sort_values('timestamp')
+                ax.plot(topic_data['timestamp'], topic_data['numeric_message'], 
+                       marker='o', label=topic, linewidth=2, markersize=4)
             
-            if not numeric_df.empty:
-                st.subheader("Message Values Over Time")
-                
-                # Use Matplotlib for better control over line rendering
-                fig, ax = plt.subplots(figsize=(26, 12))  # Much larger graph size
-                
-                # Get unique topics
-                topics = numeric_df['topic'].unique()
-                
-                # Plot each topic as a separate line
-                for topic in topics:
-                    topic_data = numeric_df[numeric_df['topic'] == topic]
-                    # Sort by timestamp to ensure proper line connections
-                    topic_data = topic_data.sort_values('timestamp')
-                    ax.plot(topic_data['timestamp'], topic_data['numeric_message'], 
-                           marker='o', label=topic, linewidth=2, markersize=4)
-                
-                # Add horizontal lines for temperature thresholds
-                ax.axhline(y=55, color='red', linestyle='--', alpha=0.7, label='55°C Limit')
-                ax.axhline(y=59, color='orange', linestyle='--', alpha=0.7, label='59°C Target Min')
-                ax.axhline(y=60, color='green', linestyle='--', alpha=0.7, label='60°C Target Max')
-                
-                ax.set_xlabel('Time', fontsize=16)
-                ax.set_ylabel('Temperature (°C)', fontsize=16)
-                ax.legend(fontsize=14)
-                ax.grid(True, alpha=0.3)
-                
-                # Improve layout with larger tick font
-                plt.xticks(rotation=45, fontsize=14)
-                plt.yticks(fontsize=14)
-                plt.tight_layout()
-                
-                # Display the plot
-                st.pyplot(fig)
-                
-            else:
-                st.info("No numeric messages found for charting.")
-        except Exception as e:
-            st.error(f"Could not display chart: {e}")
-            st.info("Messages may not be numerical")
+            # Add horizontal lines for temperature thresholds
+            ax.axhline(y=55, color='red', linestyle='--', alpha=0.7, label='55°C Limit')
+            ax.axhline(y=59, color='orange', linestyle='--', alpha=0.7, label='59°C Target Min')
+            ax.axhline(y=60, color='green', linestyle='--', alpha=0.7, label='60°C Target Max')
+            
+            ax.set_xlabel('Time', fontsize=16)
+            ax.set_ylabel('Temperature (°C)', fontsize=16)
+            ax.legend(fontsize=14)
+            ax.grid(True, alpha=0.3)
+            
+            # Improve layout with larger tick font
+            plt.xticks(rotation=45, fontsize=14)
+            plt.yticks(fontsize=14)
+            plt.tight_layout()
+            
+            # Display the plot
+            st.pyplot(fig)
+            
+        else:
+            st.info("No numeric messages found for charting.")
+    except Exception as e:
+        st.error(f"Could not display chart: {e}")
+        st.info("Messages may not be numerical")
     
     # Filter by topic input - positioned between graph and recent messages
     col_filter, col_spacer = st.columns([2, 2])
