@@ -98,36 +98,50 @@ if not df.empty:
         
         # Check alarm conditions
         alarm_triggered = False
+        warning_triggered = False
         alarm_message = ""
+        warning_message = ""
         
-        if len(latest_temps) >= 2:
+        if len(latest_temps) >= 1:
             lowest_temp = latest_temps.iloc[0]['numeric_message']
             lowest_topic = latest_temps.iloc[0]['topic']
             highest_temp = latest_temps.iloc[-1]['numeric_message']
             highest_topic = latest_temps.iloc[-1]['topic']
             
-            # Check if lowest temperature is over 55°C
-            if lowest_temp > 55:
+            # Check if lowest temperature is 55°C or above (critical alarm)
+            if lowest_temp >= 55:
                 alarm_triggered = True
-                alarm_message = f"TEMPERATURE ALARM: Lowest temperature ({lowest_topic}: {lowest_temp:.1f}°C) exceeds 55°C limit!"
+                alarm_message = f"TEMPERATURE ALARM: Lowest temperature ({lowest_topic}: {lowest_temp:.1f}°C) is not below 55°C limit!"
             
-            # Additional check: ensure one topic is in 59-60°C range
+            # Check if no temperature is in 59-60°C range (warning)
             temp_in_range = any(59 <= temp <= 60 for temp in latest_temps['numeric_message'])
-            if not temp_in_range and highest_temp < 59:
-                st.markdown(f'<div class="warning-box"><strong>Warning:</strong> No temperature in optimal 59-60°C range. Highest: {highest_topic}: {highest_temp:.1f}°C</div>', unsafe_allow_html=True)
+            if not temp_in_range:
+                warning_triggered = True
+                if highest_temp < 59:
+                    warning_message = f"No temperature in optimal 59-60°C range. Highest: {highest_topic}: {highest_temp:.1f}°C"
+                else:
+                    warning_message = f"No temperature in optimal 59-60°C range. Temperatures above 60°C detected."
         
-        # Display alarm if triggered
+        # Display status based on conditions
         if alarm_triggered:
-            st.markdown(f'<div class="alarm-box"><h4 style="color: #d32f2f; margin: 0;">CRITICAL TEMPERATURE ALERT</h4><p style="margin: 5px 0; font-size: 14px;"><strong>Current temperatures:</strong></p>', unsafe_allow_html=True)
+            # Critical alarm: lowest temp >= 55°C
+            st.markdown(f'<div class="alarm-box"><h4 style="color: #d32f2f; margin: 0;">CRITICAL TEMPERATURE ALERT</h4><p style="margin: 5px 0; font-size: 14px;"><strong>{alarm_message}</strong></p><p style="margin: 5px 0; font-size: 14px;"><strong>Current temperatures:</strong></p>', unsafe_allow_html=True)
             
             for _, row in latest_temps.iterrows():
-                color = "#d32f2f" if row['numeric_message'] > 55 else "#2e7d32"
+                color = "#d32f2f" if row['numeric_message'] >= 55 else "#2e7d32"
                 st.markdown(f"<p style='margin: 2px 0; color: {color}; font-size: 12px;'><strong>{row['topic']}: {row['numeric_message']:.1f}°C</strong></p>", unsafe_allow_html=True)
             
             st.markdown("</div>", unsafe_allow_html=True)
+        elif warning_triggered:
+            # Warning: no temp in 59-60°C range (but lowest temp is <55°C)
+            st.markdown(f'<div class="warning-box"><strong>Warning:</strong> {warning_message}</div>', unsafe_allow_html=True)
+            temp_readings = " | ".join([f"{row['topic']}: {row['numeric_message']:.1f}°C" for _, row in latest_temps.iterrows()])
+            st.markdown(f'<div style="font-size: 12px; padding: 5px; background-color: #f5f5f5; border-radius: 5px; margin: 5px 0;">Current: {temp_readings}</div>', unsafe_allow_html=True)
         else:
-            # Show current status when no alarm
-            if len(latest_temps) >= 1:
+            # OK status only when BOTH conditions are met:
+            # 1. Lowest temp is under 55°C AND
+            # 2. At least one temp is in 59-60°C range
+            if len(latest_temps) >= 1 and lowest_temp < 55 and temp_in_range:
                 st.markdown('<div class="success-box"><strong>Status:</strong> Temperature levels OK</div>', unsafe_allow_html=True)
                 temp_readings = " | ".join([f"{row['topic']}: {row['numeric_message']:.1f}°C" for _, row in latest_temps.iterrows()])
                 st.markdown(f'<div style="font-size: 12px; padding: 5px; background-color: #f5f5f5; border-radius: 5px; margin: 5px 0;">Current: {temp_readings}</div>', unsafe_allow_html=True)
