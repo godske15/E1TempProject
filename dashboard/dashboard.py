@@ -141,7 +141,7 @@ if not df.empty:
             st.subheader("Message Values Over Time")
             
             # Use Matplotlib for better control over line rendering
-            fig, ax = plt.subplots(figsize=(30, 12))  # Much larger graph size
+            fig, ax = plt.subplots(figsize=(30, 20))  # Much larger graph size
             
             # Get unique topics
             topics = numeric_df['topic'].unique()
